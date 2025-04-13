@@ -1,3 +1,15 @@
+provider "aws" {
+  region = "eu-central-1"
+}
+
+module "vpc-main" {
+  source              = "../modules/vpc"
+  vpc_name            = "MAIN-VPC"
+  vpc_cidr            = var.main_vpc
+  public_subnet_cidrs = var.main_public_subnet
+}
+
+
 module "ecr_back" {
   source       = "../modules/ecr"
   ecr_name     = "my_back_ecr"
@@ -9,7 +21,7 @@ module "ecr_back" {
 module "back_sg" {
   source      = "../modules/sg"
   allow_ports = var.allow_ports
-  vpc_id      = data.terraform_remote_state.front.outputs.FRONT_VPC_ID
+  vpc_id      = module.vpc-main.main_vpc_id
 
   sg_name  = var.sg_name
   sg_owner = var.sg_owner
@@ -28,20 +40,26 @@ module "role_dynamo_db" {
 }
 
 
+module "aws_ecs_cluster" {
+  source      = "../modules/ecs_cluster"
+  cluser_name = "Fargat-Cluster"
+}
+
+
+
 module "aws_ecs_service_back" {
   source                  = "../modules/ecs_sevice"
-  cluser_name             = data.terraform_remote_state.front.outputs.FRONT_CLUSTER_NAME
+  cluser_name             = module.aws_ecs_cluster.ecs_cluster_name
   service_name            = var.service_name
-  cluster_id              = data.terraform_remote_state.front.outputs.FRONT_CLUSTER_ID
+  cluster_id              = module.aws_ecs_cluster.ecs_cluster_id
   task_definition_id      = module.task_definition_back.task_definition_id
   launch_type             = var.launch_type
-  service_subnets         = [data.terraform_remote_state.front.outputs.FRONT_VPC_SUBNET_IDS[0]]
+  service_subnets         = module.vpc-main.public_subnet_ids
   service_security_groups = [module.back_sg.sg_id]
 
   target_group_arn = module.aws_alb_back.alb_tg_arn
   container_name   = var.back_container_name
-  #  container_port   = var.container_port
-  container_port = 8080
+  container_port   = 8080
 
 }
 
@@ -78,13 +96,13 @@ module "aws_alb_back" {
   internal                   = var.internal
   load_balancer_type         = var.load_balancer_type
   security_groups            = [module.back_sg.sg_id]
-  subnets                    = data.terraform_remote_state.front.outputs.FRONT_VPC_SUBNET_IDS
+  subnets                    = module.vpc-main.public_subnet_ids
   enable_deletion_protection = var.enable_deletion_protection
 
   tg_name     = var.tg_name
   tg_port     = var.tg_port
   tg_protocol = var.tg_protocol
-  vpc_id      = data.terraform_remote_state.front.outputs.FRONT_VPC_ID
+  vpc_id      = module.vpc-main.main_vpc_id
 
   health_check_path     = var.health_path-1
   health_check_protocol = var.health_check_protocol
@@ -98,7 +116,7 @@ module "aws_alb_back" {
 
 module "autoscaling_group_backend" {
   source       = "../modules/autoscaling_group"
-  resource_id  = "service/${data.terraform_remote_state.front.outputs.FRONT_CLUSTER_NAME}/${module.aws_ecs_service_back.ecs_service_name}"
+  resource_id  = "service/${module.aws_ecs_cluster.ecs_cluster_name}/${module.aws_ecs_service_back.ecs_service_name}"
   max_capacity = 1
   min_capacity = 1
 }

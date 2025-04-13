@@ -1,3 +1,16 @@
+#============ VPC VARS ==============
+
+variable "main_vpc" {
+  default = "192.168.0.0/16"
+}
+
+variable "main_public_subnet" {
+  default = ["192.168.10.0/24", "192.168.20.0/24"]
+}
+
+#============ ECS VARS ==============
+
+
 variable "cluser_name" {
   default = "fargate_cluster"
 }
