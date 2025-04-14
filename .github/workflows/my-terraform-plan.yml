@@ -1,5 +1,3 @@
-#test
-
 name: PR Terraform Plan
 
 on:
