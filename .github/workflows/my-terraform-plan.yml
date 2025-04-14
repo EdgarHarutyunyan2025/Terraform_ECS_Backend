@@ -22,9 +22,13 @@ jobs:
       - name: Build Docker image
         id: docker
         run: |
-          IMAGE_TAG=my-app:pr-${{ github.event.pull_request.number }}
+          IMAGE_TAG=pr-${{ github.event.pull_request.number }}
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Debug image tag output
+        run: |
+          echo "Docker image tag is: ${{ steps.docker.outputs.image_tag }}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
