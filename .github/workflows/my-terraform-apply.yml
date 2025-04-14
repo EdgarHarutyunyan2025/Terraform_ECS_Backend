@@ -1,0 +1,45 @@
+name: Terraform Apply on PR merge to main
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main  # Только если PR был слит в main
+
+jobs:
+  terraform-apply:
+    if: github.event.pull_request.merged == true  # Проверка, был ли PR слит
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        id: docker
+        run: |
+          IMAGE_TAG=my-app:pr-${{ github.event.pull_request.number }}
+          cd backend_image && docker build -t $IMAGE_TAG .
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Send Telegram Notification
+        if: success()  # Только если все шаги до этого прошли успешно
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="✅ Terraform Apply успешно завершён в ветке *main*." \
+            -d parse_mode=Markdown
