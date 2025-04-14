@@ -1,0 +1,38 @@
+name: PR Terraform Plan (Docker Local Only)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+jobs:
+  build-and-plan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        id: docker
+        run: |
+          IMAGE_TAG=my-app:pr-${{ github.event.pull_request.number }}
+          docker build -t $IMAGE_TAG .
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan (pass docker image)
+        run: terraform plan -var="docker_image=${{ steps.docker.outputs.image_tag }}" -no-color > tfplan.txt
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan.txt
+

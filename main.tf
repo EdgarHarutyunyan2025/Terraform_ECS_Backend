@@ -3,7 +3,8 @@ provider "aws" {
 }
 
 module "vpc-main" {
-  source              = "../modules/vpc"
+  # source              = "../modules/vpc"
+  source              = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//vpc"
   vpc_name            = "MAIN-VPC"
   vpc_cidr            = var.main_vpc
   public_subnet_cidrs = var.main_public_subnet
@@ -11,15 +12,17 @@ module "vpc-main" {
 
 
 module "ecr_back" {
-  source       = "../modules/ecr"
+  #source       = "../modules/ecr"
+  source       = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//ecr"
   ecr_name     = "my_back_ecr"
-  docker-image = "supervisord_db"
+  docker-image = var.docker_image
 }
 
 #========= SG ===========
 
 module "back_sg" {
-  source      = "../modules/sg"
+  #source      = "../modules/sg"
+  source      = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//sg"
   allow_ports = var.allow_ports
   vpc_id      = module.vpc-main.main_vpc_id
 
@@ -31,7 +34,8 @@ module "back_sg" {
 #========= ROLE ===========
 
 module "role_dynamo_db" {
-  source = "../modules/role_back"
+  #source = "../modules/role_back"
+  source = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//role_back"
 
   dynamo_db_arn = module.dynamo_db_back.dynamodb_table_arn
 
@@ -41,14 +45,16 @@ module "role_dynamo_db" {
 
 
 module "aws_ecs_cluster" {
-  source      = "../modules/ecs_cluster"
+  #source      = "../modules/ecs_cluster"
+  source      = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//ecs_cluster"
   cluser_name = "Fargat-Cluster"
 }
 
 
 
 module "aws_ecs_service_back" {
-  source                  = "../modules/ecs_sevice"
+  #source                  = "../modules/ecs_sevice"
+  source                  = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//ecs_sevice"
   cluser_name             = module.aws_ecs_cluster.ecs_cluster_name
   service_name            = var.service_name
   cluster_id              = module.aws_ecs_cluster.ecs_cluster_id
@@ -65,7 +71,8 @@ module "aws_ecs_service_back" {
 
 
 module "task_definition_back" {
-  source                   = "../modules/task_definition"
+  #source                   = "../modules/task_definition"
+  source                   = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//task_definition"
   family                   = var.family
   network_mode             = var.network_mode
   requires_compatibilities = var.requires_compatibilities
@@ -91,7 +98,8 @@ module "task_definition_back" {
 
 
 module "aws_alb_back" {
-  source                     = "../modules/load_balancer"
+  #source                     = "../modules/load_balancer"
+  source                     = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//load_balancer"
   lb_name                    = var.lb_name
   internal                   = var.internal
   load_balancer_type         = var.load_balancer_type
@@ -115,7 +123,8 @@ module "aws_alb_back" {
 
 
 module "autoscaling_group_backend" {
-  source       = "../modules/autoscaling_group"
+  #source       = "../modules/autoscaling_group"
+  source       = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//autoscaling_group"
   resource_id  = "service/${module.aws_ecs_cluster.ecs_cluster_name}/${module.aws_ecs_service_back.ecs_service_name}"
   max_capacity = 1
   min_capacity = 1
@@ -127,7 +136,8 @@ module "autoscaling_group_backend" {
 #-----------dynamo-------------
 
 module "dynamo_db_back" {
-  source = "../modules/dynamo_db"
+  #source = "../modules/dynamo_db"
+  source = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//dynamo_db"
 }
 
 

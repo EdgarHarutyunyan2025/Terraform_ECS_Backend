@@ -23,6 +23,10 @@ variable "launch_type" {
   default = "FARGATE"
 }
 
+variable "docker_image" {
+  default = ""
+}
+
 #============ SG VARS ==============
 
 variable "sg_name" {
