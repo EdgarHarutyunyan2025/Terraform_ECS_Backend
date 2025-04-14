@@ -1,8 +1,4 @@
-#TEST
-
-provider "aws" {
-  region = "eu-central-1"
-}
+#========= VPC ===========
 
 module "vpc-main" {
   # source              = "../modules/vpc"
@@ -12,6 +8,7 @@ module "vpc-main" {
   public_subnet_cidrs = var.main_public_subnet
 }
 
+#========= ECR ===========
 
 module "ecr_back" {
   #source       = "../modules/ecr"
@@ -45,6 +42,7 @@ module "role_dynamo_db" {
 
 }
 
+#========= ECS Cluster ===========
 
 module "aws_ecs_cluster" {
   #source      = "../modules/ecs_cluster"
@@ -52,7 +50,7 @@ module "aws_ecs_cluster" {
   cluser_name = "Fargat-Cluster"
 }
 
-
+#========= ECS Service ===========
 
 module "aws_ecs_service_back" {
   #source                  = "../modules/ecs_sevice"
@@ -123,6 +121,7 @@ module "aws_alb_back" {
 
 }
 
+#========== Autoscaling Group ============
 
 module "autoscaling_group_backend" {
   #source       = "../modules/autoscaling_group"
@@ -135,17 +134,14 @@ module "autoscaling_group_backend" {
 
 
 
-#-----------dynamo-------------
+#========== Dynamo DB ============
 
 module "dynamo_db_back" {
   #source = "../modules/dynamo_db"
   source = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//dynamo_db"
 }
 
-
-
-
-
+#========== Cloudwatch Log ============
 
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name = var.log_name
