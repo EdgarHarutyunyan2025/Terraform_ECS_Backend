@@ -1,4 +1,4 @@
-name: PR Terraform Plan (Docker Local Only)
+name: PR Terraform Plan
 
 on:
   pull_request:
@@ -20,6 +20,11 @@ jobs:
           IMAGE_TAG=my-app:pr-${{ github.event.pull_request.number }}
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::877680973630:role/GitHubTerraformRole
+          aws-region: eu-central-1
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
