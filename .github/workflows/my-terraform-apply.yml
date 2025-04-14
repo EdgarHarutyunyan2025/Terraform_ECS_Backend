@@ -24,7 +24,7 @@ jobs:
       - name: Build Docker image
         id: docker
         run: |
-          IMAGE_TAG=my-app:pr-${{ github.event.pull_request.number }}
+          IMAGE_TAG=pr-${{ github.event.pull_request.number }}
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -42,7 +42,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var="docker_image=${{ steps.docker.outputs.image_tag }}"
 
       - name: Send Telegram Notification
         if: success()  # Только если все шаги до этого прошли успешно
