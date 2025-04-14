@@ -1,3 +1,4 @@
+#new line
 name: Terraform Apply on PR merge to main
 
 on:
@@ -50,3 +51,4 @@ jobs:
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
             -d text="✅ Terraform Apply успешно завершён в ветке *main*." \
             -d parse_mode=Markdown
+
