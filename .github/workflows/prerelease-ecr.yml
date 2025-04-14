@@ -37,7 +37,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan (pass docker image)
-        run: terraform plan -var="docker_image=${{ steps.docker.outputs.image_tag }}"
+        run: terraform plan -var="docker_image=${{ steps.docker.outputs.image_tag }}" > tfplan.txt
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
@@ -45,3 +45,8 @@ jobs:
           name: terraform-plan
           path: tfplan.txt
 
+      - name: Send plan to Telegram (as file)
+        run: |
+        curl -s -F document=@plan.txt \
+        -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+        https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
