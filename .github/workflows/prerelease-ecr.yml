@@ -21,6 +21,7 @@ jobs:
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::877680973630:role/GitHubTerraformRole
