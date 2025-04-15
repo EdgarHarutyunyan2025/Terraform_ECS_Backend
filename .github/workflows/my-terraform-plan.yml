@@ -57,6 +57,13 @@ jobs:
           name: terraform-plan
           path: backend-plan.txt
 
+
+      - name: Comment Plan on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: backend-plan.txt
+
+
       - name: Send plan to Telegram (as file)
         if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
         uses: appleboy/telegram-action@master
