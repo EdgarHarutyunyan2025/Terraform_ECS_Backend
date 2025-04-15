@@ -62,7 +62,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           path: backend-plan.txt
-          GITHUB_TOKEN: ${{ secrets.Personal_Access_Token }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 
       - name: Send plan to Telegram (as file)
