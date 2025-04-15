@@ -11,7 +11,6 @@ module "vpc-main" {
 #========= ECR ===========
 
 module "ecr_back" {
-  #source       = "../modules/ecr"
   source       = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//ecr"
   ecr_name     = "my_back_ecr"
   docker-image = var.docker_image
