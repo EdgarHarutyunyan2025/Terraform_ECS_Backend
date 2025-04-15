@@ -20,7 +20,7 @@ jobs:
       - name: Build Docker image
         id: docker
         run: |
-          IMAGE_TAG=pr-${{ github.event.pull_request.number }}
+          IMAGE_TAG=backend-pr-${{ github.event.pull_request.number }}
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -41,16 +41,16 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan (pass docker image)
-        run: terraform plan  -no-color -var="docker_image=${{ steps.docker.outputs.image_tag }}" > tfplan.txt
+        run: terraform plan  -no-color -var="docker_image=${{ steps.docker.outputs.image_tag }}" > backend-plan.txt
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: tfplan.txt
+          path: backend-plan.txt
 
       - name: Send plan to Telegram (as file)
         run: |
-          curl -s -F document=@tfplan.txt \
+          curl -s -F document=@backend-plan.txt \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
           https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
