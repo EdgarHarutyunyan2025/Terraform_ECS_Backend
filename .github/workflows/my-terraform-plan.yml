@@ -40,17 +40,37 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan (pass docker image)
-        run: terraform plan  -no-color -var="docker_image=${{ steps.docker.outputs.image_tag }}" > backend-plan.txt
+      - name: Terraform refresh
+        id: refresh
+        run: terraform refresh
+        continue-on-error: true
+
+      - name: Terraform Plan 
+        id: plan
+        run:  terraform plan  -no-color -var="docker_image=${{ steps.docker.outputs.image_tag }}" > backend-plan.txt
+        continue-on-error: true
 
       - name: Upload Terraform Plan
+        if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: backend-plan.txt
 
       - name: Send plan to Telegram (as file)
-        run: |
-          curl -s -F document=@backend-plan.txt \
-          -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+        if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          document: backend-plan.txt
+          message: "✅ Terraform plan was successful for Backend."
+
+      - name: Send Telegram message
+        if: steps.refresh.outcome != 'success' || steps.plan.outcome != 'success'
+        uses: appleboy/telegram-action@master
+        with: 
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: "❌ Terraform plan failed for Backend. Please check the GitHub Actions logs."
+
