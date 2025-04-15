@@ -64,7 +64,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           document: backend-plan.txt
-          caption: "✅ Terraform plan was successful for Backend."
+          message: "✅ Terraform plan was successful for Backend."
 
       - name: Send Telegram message
         if: steps.refresh.outcome != 'success' || steps.plan.outcome != 'success'
