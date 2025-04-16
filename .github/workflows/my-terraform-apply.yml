@@ -16,7 +16,7 @@ name: Terraform Release Apply
 
 on:
   release:
-    types: [published]
+    types: [published, edited]
 
 jobs:
   release-apply:
