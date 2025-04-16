@@ -1,16 +1,28 @@
-name: Terraform Apply on PR merge to main
+#name: Terraform Apply on PR merge to main
+#
+#on:
+#  pull_request:
+#    types: [closed]
+#    branches:
+#      - main 
+#
+#jobs:
+#  terraform-apply:
+#    if: github.event.pull_request.merged == true 
+#    name: Terraform Apply
+#    runs-on: ubuntu-latest
+
+name: Terraform Release Apply
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main 
+  release:
+    types: [published]
 
 jobs:
-  terraform-apply:
-    if: github.event.pull_request.merged == true 
-    name: Terraform Apply
+  release-apply:
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
+#--------------------------------------------------------------
 
     permissions:
       id-token: write
