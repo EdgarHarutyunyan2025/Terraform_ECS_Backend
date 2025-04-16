@@ -58,11 +58,32 @@ jobs:
           path: backend-plan.txt
 
 
-      - name: Comment Plan on PR
-        uses: marocchino/sticky-pull-request-comment@v2
+            #      - name: Comment Plan on PR
+            #        uses: marocchino/sticky-pull-request-comment@v2
+            #        with:
+            #          path: backend-plan.txt
+            #          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+
+
+      - name: Create GitHub Pre-release
+        if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
+        uses: softprops/action-gh-release@v2
         with:
-          path: backend-plan.txt
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          tag_name: pre-${{ github.sha }}
+          name: Pre-release for commit ${{ github.sha }}
+          body: |
+            Pre-release with Terraform plan for Backend.
+          prerelease: true
+          files: backend-plan.txt
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+
+
+
+
+
+
 
 
       - name: Send plan to Telegram (as file)
