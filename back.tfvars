@@ -1,4 +1,9 @@
-#============ SG VARS ==============
+#============ VPC VARS ==============
+
+main_vpc           = "192.168.0.0/16"
+main_public_subnet = ["192.168.10.0/24", "192.168.20.0/24"]
+
+#============ SG VARS ===============
 
 sg_name     = "back_sg"
 sg_owner    = "Edgar"
@@ -6,6 +11,7 @@ allow_ports = ["8080", "80"]
 
 #============ ECS VARS ==============
 
+cluser_name  = "fargate_cluster"
 service_name = "Back_Servise"
 launch_type  = "FARGATE"
 
