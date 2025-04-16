@@ -136,8 +136,6 @@ module "autoscaling_group_backend" {
 }
 
 
-
-
 #========== Dynamo DB ============
 
 module "dynamo_db_back" {
