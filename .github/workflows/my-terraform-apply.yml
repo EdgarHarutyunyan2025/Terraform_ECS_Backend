@@ -36,7 +36,7 @@ jobs:
         id: docker
         run: |
           # IMAGE_TAG=pr-${{ github.event.pull_request.number }}
-          IMAGE_TAG=pr-${{ github.event.release.tag_name }}
+          IMAGE_TAG=${{ github.ref_name }}
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
