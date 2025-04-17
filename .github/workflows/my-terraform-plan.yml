@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+        #  release:
+        #    types: [prereleased]
+
 jobs:
   build-and-plan:
     runs-on: ubuntu-latest
@@ -51,6 +54,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Terraform Plan
+        is: upload
         if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
@@ -58,25 +62,26 @@ jobs:
           path: backend-plan.txt
 
 
-            #      - name: Comment Plan on PR
-            #        uses: marocchino/sticky-pull-request-comment@v2
-            #        with:
-            #          path: backend-plan.txt
-            #          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-
-
-      - name: Create GitHub Pre-release
-        if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
-        uses: softprops/action-gh-release@v2
+      - name: Comment Plan on PR
+        if: steps.upload.outcome == 'success'
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          tag_name: pre-realase-${{ github.run_number }}
-          name: Pre-release for commit ${{ github.sha  }}
-          body: |
-            Pre-release with Terraform plan for Backend.
-          prerelease: true
-          files: backend-plan.txt
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: backend-plan.txt
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+
+
+            #      - name: Create GitHub Pre-release
+            #        if: steps.refresh.outcome == 'success' 
+            #        uses: softprops/action-gh-release@v2
+            #        with:
+            #          tag_name: pre-realase-${{ github.run_number }}
+            #          name: Pre-release for commit ${{ github.sha  }}
+            #          body: |
+            #            Pre-release with Terraform plan for Backend.
+            #          prerelease: true
+            #          files: backend-plan.txt
+            #          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 
       - name: Send plan to Telegram (as file)
@@ -95,4 +100,4 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: "❌ Terraform plan failed for Backend. Please check the GitHub Actions logs."
-
+          
