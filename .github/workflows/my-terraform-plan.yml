@@ -70,7 +70,7 @@ jobs:
         if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: pre-${{ github.ref_name }}-{{ github.run_number }}
+          tag_name: pre-realase-${{ github.run_number }}
           name: Pre-release for commit ${{ github.sha  }}
           body: |
             Pre-release with Terraform plan for Backend.
