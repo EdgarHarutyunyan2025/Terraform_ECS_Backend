@@ -22,7 +22,6 @@ jobs:
   release-apply:
     if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
-#--------------------------------------------------------------
 
     permissions:
       id-token: write
