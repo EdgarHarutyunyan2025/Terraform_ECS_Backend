@@ -2,15 +2,13 @@ name: PR Terraform Plan
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [closed]
     branches:
       - main
 
-        #  release:
-        #    types: [prereleased]
-
 jobs:
   build-and-plan:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -31,11 +29,13 @@ jobs:
         run: |
           echo "Docker image tag is: ${{ steps.docker.outputs.image_tag }}"
 
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::877680973630:role/Terraform_ECS_Backent
           aws-region: eu-central-1
+
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -48,9 +48,10 @@ jobs:
         run: terraform refresh
         continue-on-error: true
 
+
       - name: Terraform Plan 
         id: plan
-        run:  terraform plan  -no-color -var="docker_image=${{ steps.docker.outputs.image_tag }}" > backend-plan.txt
+        run:  terraform plan  -no-color -var="docker_image=${{ steps.docker.outputs.image_tag }}" > release-plan.txt
         continue-on-error: true
 
       - name: Upload Terraform Plan
@@ -59,29 +60,20 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: backend-plan.txt
+          path: release-plan.txt
 
 
-      - name: Comment Plan on PR
-        if: steps.upload.outcome == 'success'
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Create GitHub Pre-release
+        if: steps.upload.outcome == 'success' 
+        uses: softprops/action-gh-release@v2
         with:
-          path: backend-plan.txt
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-
-
-            #      - name: Create GitHub Pre-release
-            #        if: steps.refresh.outcome == 'success' 
-            #        uses: softprops/action-gh-release@v2
-            #        with:
-            #          tag_name: pre-realase-${{ github.run_number }}
-            #          name: Pre-release for commit ${{ github.sha  }}
-            #          body: |
-            #            Pre-release with Terraform plan for Backend.
-            #          prerelease: true
-            #          files: backend-plan.txt
-            #          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          tag_name: pre-realase-${{ github.run_number }}
+          name: Pre-release for commit ${{ github.sha  }}
+          body: |
+            Pre-release with Terraform plan for Backend.
+          prerelease: true
+          files: release-plan.txt
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 
       - name: Send plan to Telegram (as file)
@@ -90,11 +82,12 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          document: backend-plan.txt
+          document: release-plan.txt
           message: "✅ Terraform plan was successful for Backend."
 
+
       - name: Send Telegram message
-        if: steps.refresh.outcome != 'success' || steps.plan.outcome != 'success'
+        if: steps.refresh.outcome != 'success' || steps.plan.outcome != 'success' || steps.upload.outcome != 'success'
         uses: appleboy/telegram-action@master
         with: 
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
