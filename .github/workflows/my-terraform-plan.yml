@@ -58,7 +58,6 @@ jobs:
           name: terraform-plan
           path: backend-plan.txt
 
-
       - name: Comment Plan on PR
         if: steps.upload.outcome == 'success'
         uses: marocchino/sticky-pull-request-comment@v2
