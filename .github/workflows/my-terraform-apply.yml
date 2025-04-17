@@ -63,4 +63,3 @@ jobs:
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
             -d text="✅ Terraform Apply Backend Success " \
             -d parse_mode=Markdown
-
