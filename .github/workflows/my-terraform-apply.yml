@@ -16,7 +16,7 @@ name: Terraform Release Apply
 
 on:
   release:
-    types: [published, edited]
+    types: [edited]
 
 jobs:
   release-apply:
@@ -36,7 +36,7 @@ jobs:
         id: docker
         run: |
           # IMAGE_TAG=pr-${{ github.event.pull_request.number }}
-          IMAGE_TAG="${REPO_NAME}
+          IMAGE_TAG="${REPO_NAME}"
           cd backend_image && docker build -t $IMAGE_TAG .
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
