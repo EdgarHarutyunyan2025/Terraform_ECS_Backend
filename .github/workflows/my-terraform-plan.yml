@@ -6,9 +6,6 @@ on:
     branches:
       - main
 
-        #  release:
-        #    types: [prereleased]
-
 jobs:
   build-and-plan:
     runs-on: ubuntu-latest
@@ -70,20 +67,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 
-
-            #      - name: Create GitHub Pre-release
-            #        if: steps.refresh.outcome == 'success' 
-            #        uses: softprops/action-gh-release@v2
-            #        with:
-            #          tag_name: pre-realase-${{ github.run_number }}
-            #          name: Pre-release for commit ${{ github.sha  }}
-            #          body: |
-            #            Pre-release with Terraform plan for Backend.
-            #          prerelease: true
-            #          files: backend-plan.txt
-            #          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
-
       - name: Send plan to Telegram (as file)
         if: steps.refresh.outcome == 'success' && steps.plan.outcome == 'success'
         uses: appleboy/telegram-action@master
@@ -100,4 +83,3 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: "❌ Terraform plan failed for Backend. Please check the GitHub Actions logs."
-          
