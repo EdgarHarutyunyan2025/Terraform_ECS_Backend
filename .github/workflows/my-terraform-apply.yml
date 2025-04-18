@@ -38,12 +38,32 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
+        id: Apply
         run: terraform apply -auto-approve -var="docker_image=${{ steps.docker.outputs.image_tag }}"
 
-      - name: Send Telegram Notification
-        if: success()
-        run: |
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
-            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="✅ Terraform Apply Backend Success " \
-            -d parse_mode=Markdown
+          #      - name: Send Telegram Notification
+          #        if: success()
+          #        run: |
+          #          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          #            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          #            -d text="✅ Terraform Apply Backend Success " \
+          #            -d parse_mode=Markdown
+          #
+      
+      - name: Send plan to Telegram (as file)
+        if: steps.Apply.outcome == 'success' 
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          document: backend-plan.txt
+          message: "✅ Terraform Apply was successful for  Backend."
+
+      - name: Send Telegram message
+        if: steps.Apply.outcome != 'success'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: "❌ Terraform Apply failed for  Backend. Please check the GitHub Actions logs."
+
