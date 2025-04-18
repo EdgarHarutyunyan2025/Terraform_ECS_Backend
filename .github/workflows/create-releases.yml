@@ -78,7 +78,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           document: release-plan.txt
-          message: "✅ Terraform plan was successful for Backend."
+          message: "✅ Terraform plan was successful for Closed PR and Create Pre-release in Backend."
 
 
       - name: Send Telegram message
@@ -87,5 +87,5 @@ jobs:
         with: 
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: "❌ Terraform plan failed for Backend. Please check the GitHub Actions logs."
+          message: "❌ Terraform plan failed for Closed PR in Backend. Please check the GitHub Actions logs."
           
