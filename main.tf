@@ -1,7 +1,6 @@
 #========= VPC ===========
 
 module "vpc-main" {
-  # source              = "../modules/vpc"
   source              = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//vpc"
   vpc_name            = "MAIN-VPC"
   vpc_cidr            = var.main_vpc
@@ -24,7 +23,6 @@ module "ecr_back" {
 #========= SG ===========
 
 module "back_sg" {
-  #source      = "../modules/sg"
   source      = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//sg"
   allow_ports = var.allow_ports
   vpc_id      = module.vpc-main.main_vpc_id
@@ -37,13 +35,9 @@ module "back_sg" {
 #========= ROLE ===========
 
 module "role_dynamo_db" {
-  #source = "../modules/role_back"
-  source = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//role_back"
-
+  source        = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//role_back"
   dynamo_db_arn = module.dynamo_db_back.dynamodb_table_arn
-
-  log_name = var.log_name
-
+  log_name      = var.log_name
 }
 
 #========= ECS Cluster ===========
@@ -128,7 +122,6 @@ module "aws_alb_back" {
 #========== Autoscaling Group ============
 
 module "autoscaling_group_backend" {
-  #source       = "../modules/autoscaling_group"
   source       = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//autoscaling_group"
   resource_id  = "service/${module.aws_ecs_cluster.ecs_cluster_name}/${module.aws_ecs_service_back.ecs_service_name}"
   max_capacity = 1
@@ -139,7 +132,6 @@ module "autoscaling_group_backend" {
 #========== Dynamo DB ============
 
 module "dynamo_db_back" {
-  #source = "../modules/dynamo_db"
   source = "git::https://github.com/EdgarHarutyunyan2025/Terraform_ECS_Modules.git//dynamo_db"
 }
 
